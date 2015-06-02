@@ -5,6 +5,8 @@ import com.codebakery.Eduino.Application.GUI.Block.BlockGroup.BlockGroup;
 import com.codebakery.Eduino.Application.GUI.Block.BlockThread.Range;
 import com.codebakery.Eduino.Application.Main.Main;
 
+import java.util.ArrayList;
+
 /**
  * Created by codertimo on 15. 5. 29..
  */
@@ -51,6 +53,7 @@ public class BlockBuilder {
 
         updateUI(result, block);
     }
+
     private void updateUI(Block block)  // No Result
     {
         double height_sum =0;
@@ -77,31 +80,77 @@ public class BlockBuilder {
         Block standard  = result.block;
         //Result 내의 Block 가져옴 <- 클릭한 블럭 위 또는 아래 블럭
 
-        double height_sum = 0;
-        for(int i=block.id.blockGroup.indexOf(block)+1;i<block.id.blockGroup.size();i++)
-        {
-            Block temp = block.id.blockGroup.get(i);
-            height_sum+=temp.getHeight();
+        ArrayList<Block> temp = new ArrayList<>();
+
+        if(result.isUp) {
+            double height_sum =0;
+            for(int i=1;i<block.getChildren().size();i++)
+            {
+                height_sum += ((Block)block.getChildren().get(i)).getHeight();
+                temp.add(((Block)block.getChildren().get(i)));
+            }
+
+            block.setLayoutX(standard.getLayoutX());
+            block.setLayoutY(standard.getLayoutY()-block.getHeight());
+
+            double block_height = block.getHeight();
+            if(block.getChildren().size()!=1)
+            {
+                int size= block.getChildren().size();
+                for(int i=0;i<size-1;i++)
+                {
+                    Main.root.getChildren().add(temp.get(i));
+
+                    temp.get(i).setLayoutX(block.getLayoutX());
+                    temp.get(i).setLayoutY(block.getLayoutY() + (block_height - height_sum));
+
+                    height_sum -= temp.get(0).getHeight();
+                }
+            }
         }
-        //Click 한 블럭의 VBox Height를 가져옴
 
-        block.setLayoutX(standard.getLayoutX());
-        block.setLayoutY(standard.getLayoutY()+standard.getHeight());
-        //Vbox 전체를 result로 이동시킴
+        else {
 
-        double block_height = block.getHeight();
-        for(int i=standard.id.blockGroup.indexOf(standard)+1;i<standard.id.blockGroup.size();i++)  //
-        {
-            Block thisBlock = standard.id.blockGroup.get(i);
+            if(!result.isBig)
+            {
+                BlockGroup tempGroup = block.id.blockGroup;
+                for(int i=tempGroup.indexOf(block)+1;i<tempGroup.size();i++)
+                {
+                    if(!tempGroup.contains(tempGroup.get(i)))
+                    {
+                        block.getChildren().add(tempGroup.get(i));
+                    }
+                }
+            }
 
-            Main.root.getChildren().add(thisBlock);
+            double height_sum = 0;
+            for(int i=1;i<block.getChildren().size();i++)
+            {
+                height_sum += ((Block)block.getChildren().get(i)).getHeight();
+                temp.add(((Block)block.getChildren().get(i)));
+            }
+            //Click 한 블럭의 VBox Height를 가져옴
 
-            thisBlock.setLayoutX(block.getLayoutX());
-            thisBlock.setLayoutY(block.getLayoutY()+(block_height-height_sum));
+            block.setLayoutX(standard.getLayoutX());
+            block.setLayoutY(standard.getLayoutY() + standard.getHeight());
+            //Vbox 전체를 result로 이동시킴
 
-            height_sum-=thisBlock.getHeight();
+            double block_height = block.getHeight();
+            if (block.getChildren().size() != 1)
+            {
+                int size= block.getChildren().size();
+                for (int i=0;i<size-1;i++)
+                {
+                    Main.root.getChildren().add(temp.get(i));
+
+                    temp.get(i).setLayoutX(block.getLayoutX());
+                    temp.get(i).setLayoutY(block.getLayoutY() + (block_height - height_sum));
+
+                    height_sum -= temp.get(i).getHeight();
+                }
+            }
+            ///Start From Here about UI
         }
-        ///Start From Here about UI
 
     }
 }
