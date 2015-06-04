@@ -19,16 +19,26 @@ public class BlockThread extends Thread {
 
     boolean run_flag = true;
     public void run(){
-
         while(run_flag) {  //repeat until run_flag Stop
-
             result = checkCollision();
             if (result != null){
-                //Make Highlight
+                Main.controlCenter.highLight(result);
             }
+            else
+            {
+                Main.controlCenter.highlight();
+            }
+            try {
+                Thread.sleep(100);
+            }
+            catch (Exception e) {
+                System.out.print(e);
+            }
+
         }
 
     }
+
     public BlockThread(Block block)
     {
         this.movingObject = block;
@@ -37,38 +47,74 @@ public class BlockThread extends Thread {
         setUpRange();
         //setting up Range from controlCenter's Block Lists
 
-        collisionCheck = new CollisionCheck(block,movingObject);
+        collisionCheck = new CollisionCheck(movingObject);
         //collision Check Object Create
 
-        this.run();
+        this.start();
     }
 
 
     private void setUpRange()
     {
-        ArrayList<BlockListItem> tempBlockList = Main.controlCenter.getBlockList();
-        for(BlockListItem blockListItem : tempBlockList) {
+        for(BlockListItem blockListItem : Main.controlCenter.getBlockList()) {
             Block block = blockListItem.block;
-            if (blockListItem.blockGroup == null) {   //블럭 혼자일때
-                ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, true, true));
-                ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, false, true));
-            } else if (blockListItem.blockGroup.get(0) == block) {  //첫번쨰 블럭
-                ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, true, true));
-                ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, false, false));
-            } else if (blockListItem.blockGroup.get(blockListItem.blockGroup.size() - 1) == block) {  //마지막 블럭
-                ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, false, true));
-            } else {  //어중간한 블럭
-                ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, false, false));
+
+            if((movingObject.id.blockGroup!=null && !movingObject.id.blockGroup.contains(block))||(movingObject!=block)) {
+                if (blockListItem.blockGroup == null) {   //블럭 혼자일때
+                    ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, true, true));
+                    ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, false, true));
+                } else if (blockListItem.blockGroup.get(0) == block) {  //첫번쨰 블럭
+                    ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, true, true));
+                    ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, false, false));
+                } else if (blockListItem.blockGroup.get(blockListItem.blockGroup.size() - 1) == block) {  //마지막 블럭
+                    ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, false, true));
+                } else {  //어중간한 블럭
+                    ranges.add(new Range(block.getLayoutX(), block.getLayoutY(), block, false, false));
+                }
             }
         }
     }
 
     private Range checkCollision()
     {
+        ArrayList<Block> notMoving = new ArrayList<>();
+        notMoving.add(movingObject);
+        for(int i=1;i<movingObject.getChildren().size();i++)
+        {
+            notMoving.add((Block)movingObject.getChildren().get(i));
+        }
+
         for(Range range : ranges) {
-            Range result = collisionCheck.check(range);
-            if(result!=null)
-                return result;
+            ArrayList<Range> results = new ArrayList<>();
+            if(!notMoving.contains(range.block)){
+                Range result = collisionCheck.check(range);
+                if(result!=null) {
+                    results.add(result);
+                }
+            }
+            //System.out.println("[Results] "+results);
+            if(results.size() != 0)
+            {
+                if(results.size()>1)
+                {
+                    Range result = null;
+                    double value =1000;
+                    for(Range r :results)
+                    {
+                        double temp = Math.abs(movingObject.getLayoutX() - r.x)+Math.abs(movingObject.getLayoutY()-r.y);
+                        if(value>temp)
+                        {
+                            result = r;
+                            value = temp;
+                        }
+                    }
+                    return result;
+                }
+                else
+                {
+                    return results.get(0);
+                }
+            }
         }
         return null;
     }

@@ -9,9 +9,9 @@ import com.codebakery.Eduino.Application.Main.Main;
  * Created by codertimo on 15. 5. 23..
  */
 public class SplitBlock {
-    BlockGroup orizinal;
-    BlockGroup previous;
-    BlockGroup next;
+    private BlockGroup orizinal;
+    private BlockGroup previous;
+    private BlockGroup next;
 
     public SplitBlock(){}
     public SplitBlock(Block block)
@@ -33,11 +33,16 @@ public class SplitBlock {
             else
                 next.add(blocks);
         }
+        updateBlockList();
 
     }
     private void updateBlockList()
     {
         Main.controlCenter.updateBlockList(previous);
         Main.controlCenter.updateBlockList(next);
+    }
+    public BlockGroup getNextBlockGroup()
+    {
+        return this.next;
     }
 }

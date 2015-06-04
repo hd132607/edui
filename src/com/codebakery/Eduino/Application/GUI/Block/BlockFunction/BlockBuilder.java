@@ -37,15 +37,31 @@ public class BlockBuilder {
         }
         else  //result is Down
         {
-            if(result.block.id.blockGroup!=null)
-                dstBlockGroup.addAll(result.block.id.blockGroup);
-            else
-                dstBlockGroup.add(result.block);
+            if(result.isBig) {
+                if(result.block.id.blockGroup!=null)
+                    dstBlockGroup.addAll(result.block.id.blockGroup);
+                else
+                    dstBlockGroup.add(result.block);
 
-            if(block.id.blockGroup!=null)
-                dstBlockGroup.addAll(block.id.blockGroup);
+                if(block.id.blockGroup!=null)
+                    dstBlockGroup.addAll(block.id.blockGroup);
+                else
+                    dstBlockGroup.add(block);
+            }
             else
-                dstBlockGroup.add(block);
+            {
+                for(int i=0;i<=result.block.id.blockGroup.indexOf(result.block);i++)
+                    dstBlockGroup.add(result.block.id.blockGroup.get(i));
+
+                if(block.id.blockGroup!=null)
+                    dstBlockGroup.addAll(block.id.blockGroup);
+                else
+                    dstBlockGroup.add(block);
+
+                for(int i=result.block.id.blockGroup.indexOf(result.block)+1;i<result.block.id.blockGroup.size();i++)
+                    dstBlockGroup.add(result.block.id.blockGroup.get(i));
+            }
+
         }
 
         Main.controlCenter.updateBlockList(dstBlockGroup);
@@ -110,15 +126,16 @@ public class BlockBuilder {
         }
 
         else {
-
+            double sum =0;
             if(!result.isBig)
             {
                 BlockGroup tempGroup = block.id.blockGroup;
                 for(int i=tempGroup.indexOf(block)+1;i<tempGroup.size();i++)
                 {
-                    if(!tempGroup.contains(tempGroup.get(i)))
+                    if(!block.getChildren().contains(tempGroup.get(i)))
                     {
                         block.getChildren().add(tempGroup.get(i));
+                        sum+=tempGroup.get(i).getHeight();
                     }
                 }
             }
@@ -136,6 +153,13 @@ public class BlockBuilder {
             //Vbox 전체를 result로 이동시킴
 
             double block_height = block.getHeight();
+            if(!result.isBig) {
+                if (block.getChildren().size() == 1)
+                    block_height += height_sum;
+                else
+                    block_height += sum;
+            }
+
             if (block.getChildren().size() != 1)
             {
                 int size= block.getChildren().size();

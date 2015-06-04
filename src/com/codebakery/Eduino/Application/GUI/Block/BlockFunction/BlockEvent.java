@@ -2,6 +2,7 @@ package com.codebakery.Eduino.Application.GUI.Block.BlockFunction;
 
 import com.codebakery.Eduino.Application.GUI.Block.Block;
 import com.codebakery.Eduino.Application.GUI.Block.BlockGroup.BlockGroup;
+import com.codebakery.Eduino.Application.GUI.Block.BlockList.BlockListItem;
 import com.codebakery.Eduino.Application.GUI.Block.BlockThread.BlockThread;
 import com.codebakery.Eduino.Application.GUI.Block.BlockThread.Range;
 import com.codebakery.Eduino.Application.Main.Main;
@@ -17,40 +18,30 @@ public class BlockEvent {
                 @Override
                 public void handle(MouseEvent event) {
                     Block block = (Block)event.getSource();
-                    //get Event Block
+                    //0. get Event Block
 
-                    Main.controlCenter.setPointerBlock(block.id);
-                    // set Pointer about block
+                    SplitBlock splitBlock =null;
+                    if(block.id.blockGroup!=null) {
+                        splitBlock = new SplitBlock(block);
+                    }
+                    //1. Split Clicked Block group
 
-                    BlockGroup moveBlockGroup  = new BlockGroup();
-                    BlockGroup splitedBlock = new BlockGroup();
-                    if(block.id.blockGroup != null) // Making Moving Block
-                    {
-                        boolean isMoveSect = false;
-                        for(Block forblock :block.id.blockGroup)
-                        {
-                            if(forblock == block)
-                                isMoveSect = true;
-                            if(isMoveSect)
-                                moveBlockGroup.add(forblock);
-                            else
-                                splitedBlock.add(forblock);
+
+                    if(splitBlock!=null) {
+                        for (Block b : splitBlock.getNextBlockGroup()) {
+                            if (b != block)
+                                block.getChildren().add(b);
                         }
                     }
+                    //2. Add blocks to Clicked block
 
-                    // Update BlockList
-                    Main.controlCenter.updateBlockList(moveBlockGroup);
-                    Main.controlCenter.updateBlockList(splitedBlock);
-
-                    //Update UI
-                    for(Block b:moveBlockGroup)
+                    for(BlockListItem item :Main.controlCenter.getBlockList())
                     {
-                        if(b!=block)
-                            block.getChildren().add(b);
+                        System.out.println("["+item.block+"]: "+item.blockGroup);
                     }
 
-                    //Starting BlockThread
                     Main.controlCenter.setBlockThread(new BlockThread(block));
+                    //3. Start Thread
                 }
             };
 
@@ -59,38 +50,30 @@ public class BlockEvent {
                 @Override
                 public void handle(MouseEvent event) {
                     Block block = (Block)event.getSource();
-                    //get Event Block
+                    //0. get Event Block
 
                     Main.controlCenter.getBlockThread().threadStop();
-                    //Stop Thread
+                    //1. Stop Thread
 
                     Range result = Main.controlCenter.getBlockThread().getResult();
-                    //get Event Block
+                    //2. get Result block
 
                     if(result != null)
                     {
                         BlockBuilder blockBuilder = new BlockBuilder(result,block);
+                        System.out.println("[Result] isBig:"+result.isBig+" isUp:"+result.isUp);
+                        //3-0. AddBlock and Replace UI <- Result Ex
                     }
-                    else
+                    else {
+                        BlockBuilder blockBuilder = new BlockBuilder(block);
+                        //3-1. Replace UI <- No Result
+                    }
+                    for(BlockListItem item :Main.controlCenter.getBlockList())
                     {
-                        if(block.id.blockGroup == null)
-                        {
-                            //Nothing do
-                        }
-                        else
-                        {
-                            for(int i=0;i<block.id.blockGroup.size();i++)
-                            {
-                                Block this_block = block.id.blockGroup.get(i);
-
-                                this_block.setLayoutX(block.id.blockGroup.get(i-1).getLayoutX());
-                                this_block.setLayoutY(block.id.blockGroup.get(i-1).getLayoutY()+
-                                                        this_block.id.blockGroup.get(i-1).getHeight());
-
-                            }
-                        }
+                        System.out.println("["+item.block+"]: "+item.blockGroup);
                     }
-
+                    // UI Update
+                    Main.controlCenter.highlight();
                 }
             };
 }

@@ -1,6 +1,10 @@
 package com.codebakery.Eduino.Application.GUI.Block.BlockThread;
 
 import com.codebakery.Eduino.Application.GUI.Block.Block;
+import com.codebakery.Eduino.Application.GUI.Block.BlockType.ValueBlock.ValueBlock;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 
 /**
  * Created by codertimo on 15. 5. 25..
@@ -25,15 +29,21 @@ public class Range {
         {
             this.width = block.getWidth();
             this.height = 100;
+            if(isUp)
+                this.y = this.y - this.height;
+            else
+                this.y = this.y + block.getHeight();
         }
         else
         {
             this.width = block.getWidth();
-            this.height = 10;
+            this.height = 50;
+
+            if(isUp)
+                this.y = this.y - this.height;
+            else
+                this.y = this.y + block.getHeight();
         }
     }
-
-
-
 
 }

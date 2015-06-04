@@ -4,6 +4,9 @@ import com.codebakery.Eduino.Application.GUI.Block.Block;
 import com.codebakery.Eduino.Application.GUI.Block.BlockGroup.BlockGroup;
 import javafx.scene.layout.VBox;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by codertimo on 15. 5. 25..
  */
@@ -12,19 +15,24 @@ public class CollisionCheck {
     public double y;
     public double width;
     public double height;
+    public Block movingObject;
 
-    public CollisionCheck(Block rootBlock, VBox movingObject)
+    public CollisionCheck(Block movingObject)
     {
-        x = rootBlock.getLayoutX();
-        height = rootBlock.getHeight() + movingObject.getHeight();
-        if(rootBlock.getWidth() > movingObject.getWidth())
-            width = rootBlock.getWidth();
-        else
-            width = movingObject.getWidth();
+        this.movingObject = movingObject;
+        for(int i=1;i<movingObject.getChildren().size();i++)
+            height+=((Block)movingObject.getChildren().get(i)).getHeight();
+        height+=movingObject.getHeight();
+        System.out.println("[Height]:" + height);
+        width = movingObject.getWidth();
     }
 
     public Range check(Range range)
     {
+
+        this.x = movingObject.getLayoutX();
+        this.y = movingObject.getLayoutY();
+
         if(this.x < range.x+range.width &&
                 this.x + this.width>range.x &&
                 this.y < range.y + range.height &&
